@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Estimulación para Bebés</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: #2D3748;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .sidebar .navbar-brand {
+            color: white;
+            font-size: 1.5rem;
+            padding: 10px 15px;
+            display: block;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .sidebar .nav-link {
+            color: #cbd5e0;
+            padding: 12px 15px;
+            margin: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .sidebar .nav-link:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .sidebar .nav-link.active {
+            background-color: #4299e1;
+            color: white;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+        .stat-card {
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+        }
+        .bg-primary-gradient {
+            background: linear-gradient(to right, #4299e1, #63b3ed);
+        }
+        .bg-success-gradient {
+            background: linear-gradient(to right, #48bb78, #68d391);
+        }
+        .bg-info-gradient {
+            background: linear-gradient(to right, #0d9488, #5eead4);
+        }
+        .bg-warning-gradient {
+            background: linear-gradient(to right, #eab308, #fde047);
+        }
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4299e1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .toggle-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #2D3748;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar.show {
+                margin-left: 0;
+            }
+            .toggle-sidebar {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="navbar-brand">Estimulación Bebés</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="dashboard.html">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="bebes.html">
+                    <i class="fas fa-baby"></i> Bebés
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="sesiones.html">
+                    <i class="fas fa-calendar-alt"></i> Sesiones
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="recomendaciones.html">
+                    <i class="fas fa-lightbulb"></i> Recomendaciones
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="mensajes.html">
+                    <i class="fas fa-comments"></i> Mensajes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="historial.html">
+                    <i class="fas fa-chart-line"></i> Historial
+                </a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link" href="#" id="logout-link">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4 rounded">
+            <div class="container-fluid">
+                <button class="toggle-sidebar me-2" id="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="navbar-brand d-lg-none">Estimulación Bebés</span>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-2" id="user-avatar">U</div>
+                                <span id="user-name">Usuario</span>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="perfil.html">Mi Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="dropdown-logout">Cerrar Sesión</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container-fluid">
+            <h1 class="mb-4">Dashboard</h1>
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card stat-card bg-primary-gradient">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5>Bebés</h5>
+                                <h2 id="total-bebes">0</h2>
+                            </div>
+                            <div class="col-4 text-end">
+                                <i class="fas fa-baby stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card bg-success-gradient">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5>Sesiones</h5>
+                                <h2 id="total-sesiones">0</h2>
+                            </div>
+                            <div class="col-4 text-end">
+                                <i class="fas fa-calendar-check stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card bg-info-gradient">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5>Sesiones Hoy</h5>
+                                <h2 id="sesiones-hoy">0</h2>
+                            </div>
+                            <div class="col-4 text-end">
+                                <i class="fas fa-clipboard-check stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card bg-warning-gradient">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5>Mensajes</h5>
+                                <h2 id="total-mensajes">0</h2>
+                            </div>
+                            <div class="col-4 text-end">
+                                <i class="fas fa-envelope stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Próximas Sesiones</h5>
+                            <a href="sesiones.html" class="btn btn-sm btn-primary">Ver Todas</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Bebé</th>
+                                            <th>Fecha</th>
+                                            <th>Tipo</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="proximas-sesiones">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Cargando...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Últimas Recomendaciones</h5>
+                            <a href="recomendaciones.html" class="btn btn-sm btn-primary">Ver Todas</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Bebé</th>
+                                            <th>Tipo</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ultimas-recomendaciones">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Cargando...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Mensajes Recientes</h5>
+                            <a href="mensajes.html" class="btn btn-sm btn-primary">Ver Todos</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Remitente</th>
+                                            <th>Asunto</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mensajes-recientes">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Cargando...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Verificar si el usuario está autenticado
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Cargar información del usuario
+            cargarDatosUsuario();
+            
+            // Cargar datos para el dashboard
+            cargarDatosDashboard();
+            
+            // Toggle Sidebar
+            document.getElementById('toggle-sidebar').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('show');
+            });
+            
+            // Cerrar sesión
+            document.getElementById('logout-link').addEventListener('click', cerrarSesion);
+            document.getElementById('dropdown-logout').addEventListener('click', cerrarSesion);
+        });
+        
+        function cerrarSesion(e) {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('token_type');
+            window.location.href = 'login.html';
+        }
+        
+        async function cargarDatosUsuario() {
+            try {
+                const token = localStorage.getItem('token');
+                const tokenType = localStorage.getItem('token_type');
+                
+                const response = await fetch('http://localhost:8000/usuarios/me', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const usuario = await response.json();
+                    document.getElementById('user-name').textContent = usuario.nombre;
+                    document.getElementById('user-avatar').textContent = usuario.nombre.charAt(0);
+                }
+            } catch (error) {
+                console.error('Error al cargar datos del usuario:', error);
+            }
+        }
+        
+        async function cargarDatosDashboard() {
+            try {
+                const token = localStorage.getItem('token');
+                const tokenType = localStorage.getItem('token_type');
+                
+                // Cargar contadores
+                const responseBebes = await fetch('http://localhost:8000/bebes/', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`
+                    }
+                });
+                
+                if (responseBebes.ok) {
+                    const bebes = await responseBebes.json();
+                    document.getElementById('total-bebes').textContent = bebes.length;
+                }
+                
+                const responseSesiones = await fetch('http://localhost:8000/sesiones/', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`
+                    }
+                });
+                
+                if (responseSesiones.ok) {
+                    const sesiones = await responseSesiones.json();
+                    document.getElementById('total-sesiones').textContent = sesiones.length;
+                    
+                    // Filtrar sesiones de hoy
+                    const hoy = new Date().toISOString().split('T')[0];
+                    const sesionesHoy = sesiones.filter(s => s.fecha.startsWith(hoy));
+                    document.getElementById('sesiones-hoy').textContent = sesionesHoy.length;
+                    
+                    // Cargar próximas sesiones
+                    cargarProximasSesiones(sesiones);
+                }
+                
+                const responseMensajes = await fetch('http://localhost:8000/mensajes/', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`
+                    }
+                });
+                
+                if (responseMensajes.ok) {
+                    const mensajes = await responseMensajes.json();
+                    document.getElementById('total-mensajes').textContent = mensajes.length;
+                    cargarMensajesRecientes(mensajes);
+                }
+                
+                const responseRecomendaciones = await fetch('http://localhost:8000/recomendaciones/', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`
+                    }
+                });
+                
+                if (responseRecomendaciones.ok) {
+                    const recomendaciones = await responseRecomendaciones.json();
+                    cargarUltimasRecomendaciones(recomendaciones);
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar datos del dashboard:', error);
+            }
+        }
+        
+        async function cargarProximasSesiones(sesiones) {
+            try {
+                const token = localStorage.getItem('token');
+                const tokenType = localStorage.getItem('token_type');
+                
+                // Ordenar por fecha (las más próximas primero)
+                const proximas = sesiones
+                    .filter(s => s.estado === 'pendiente')
+                    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+                    .slice(0, 5);
+                
+                if (proximas.length === 0) {
+                    document.getElementById('proximas-sesiones').innerHTML = 
+                        '<tr><td colspan="4" class="text-center">No hay sesiones programadas</td></tr>';
+                    return;
+                }
+                
+                // Obtener información de los bebés
+                const responseBebes = await fetch('http://localhost:8000/bebes/', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`
+                    }
+                });
+                
+                let bebes = [];
+                if (responseBebes.ok) {
+                    bebes = await responseBebes.json();
+                }
+                
+                let html = '';
+                for (const sesion of proximas) {
+                    const bebe = bebes.find(b => b.id === sesion.id_bebe) || { nombre: 'Desconocido' };
+                    const fecha = new Date(sesion.fecha).toLocaleDateString();
+                    
+                    html += `
+                    <tr>
+                        <td>${bebe.nombre}</td>
+                        <td>${fecha}</td>
+                        <td><span class="badge bg-info">${sesion.tipo_estimulo}</span></td>
+                        <td><span class="badge bg-warning">${sesion.estado}</span></td>
+                    </tr>`;
+                }
+                
+                document.getElementById('proximas-sesiones').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error al cargar próximas sesiones:', error);
+                document.getElementById('proximas-sesiones').innerHTML = 
+                    '<tr><td colspan="4" class="text-center">Error al cargar los datos</td></tr>';
+            }
+        }
+        
+        async function cargarUltimasRecomendaciones(recomendaciones) {
+            try {
+                const token = localStorage.getItem('token');
+                const tokenType = localStorage.getItem('token_type');
+                
+                // Ordenar por fecha (las más recientes primero)
+                const ultimas = recomendaciones
+                    .sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion))
+                    .slice(0, 5);
+                
+                if (ultimas.length === 0) {
+                    document.getElementById('ultimas-recomendaciones').innerHTML = 
+                        '<tr><td colspan="4" class="text-center">No hay recomendaciones recientes</td></tr>';
+                    return;
+                }
+                
+                // Obtener información de los bebés
+                const responseBebes = await fetch('http://localhost:8000/bebes/', {
+                    headers: {
+                        'Authorization': `${tokenType} ${token}`
+                    }
+                });
+                
+                let bebes = [];
+                if (responseBebes.ok) {
+                    bebes = await responseBebes.json();
+                }
+                
+                let html = '';
+                for (const recomendacion of ultimas) {
+                    const bebe = bebes.find(b => b.id === recomendacion.id_bebe) || { nombre: 'Desconocido' };
+                    const fecha = new Date(recomendacion.fecha_creacion).toLocaleDateString();
+                    
+                    html += `
+                    <tr>
+                        <td>${bebe.nombre}</td>
+                        <td>${recomendacion.tipo}</td>
+                        <td>${fecha}</td>
+                        <td><span class="badge bg-${recomendacion.aplicada ? 'success' : 'secondary'}">${recomendacion.aplicada ? 'Aplicada' : 'Pendiente'}</span></td>
+                    </tr>`;
+                }
+                
+                document.getElementById('ultimas-recomendaciones').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error al cargar últimas recomendaciones:', error);
+                document.getElementById('ultimas-recomendaciones').innerHTML = 
+                    '<tr><td colspan="4" class="text-center">Error al cargar los datos</td></tr>';
+            }
+        }
+        
+        async function cargarMensajesRecientes(mensajes) {
+            try {
+                // Ordenar por fecha (los más recientes primero)
+                const recientes = mensajes
+                    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+                    .slice(0, 5);
+                
+                if (recientes.length === 0) {
+                    document.getElementById('mensajes-recientes').innerHTML = 
+                        '<tr><td colspan="4" class="text-center">No hay mensajes recientes</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                for (const mensaje of recientes) {
+                    const fecha = new Date(mensaje.fecha).toLocaleDateString();
+                    const estado = mensaje.leido ? 'Leído' : 'No leído';
+                    const estadoClass = mensaje.leido ? 'success' : 'danger';
+                    
+                    html += `
+                    <tr>
+                        <td>${mensaje.remitente}</td>
+                        <td>${mensaje.asunto}</td>
+                        <td>${fecha}</td>
+                        <td><span class="badge bg-${estadoClass}">${estado}</span></td>
+                    </tr>`;
+                }
+                
+                document.getElementById('mensajes-recientes').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error al cargar mensajes recientes:', error);
+                document.getElementById('mensajes-recientes').innerHTML = 
+                    '<tr><td colspan="4" class="text-center">Error al cargar los datos</td></tr>';
+            }
+        }
+    </script>
+</body>
+</html>
