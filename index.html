@@ -1,0 +1,168 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Gestión Pediátrica - Login</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="text-center">
+      <i class="fas fa-baby-carriage fa-3x" style="color: var(--primary); margin-bottom: 10px;"></i>
+      <h1>Sistema Pediátrico</h1>
+      <p style="margin-bottom: 25px; color: var(--text-light);">Gestión de bebés y citas médicas</p>
+    </div>
+
+    <div class="form">
+      <h2><i class="fas fa-user-plus"></i> Registrarse</h2>
+      <div class="mb-10">
+        <label for="regUser">Usuario</label>
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="regUser" placeholder="Ingrese su nombre de usuario" />
+        </div>
+      </div>
+      
+      <div class="mb-10">
+        <label for="regPass">Contraseña</label>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="regPass" placeholder="Ingrese su contraseña" />
+        </div>
+      </div>
+      
+      <div class="mb-10">
+        <label for="regRole">Tipo de usuario</label>
+        <div class="input-group">
+          <i class="fas fa-user-tag"></i>
+          <select id="regRole">
+            <option value="usuario">Usuario (Paciente)</option>
+            <option value="medico">Médico</option>
+          </select>
+        </div>
+      </div>
+      
+      <button onclick="
+        localStorage.setItem(
+          document.getElementById('regUser').value,
+          JSON.stringify({
+            pass: document.getElementById('regPass').value,
+            role: document.getElementById('regRole').value
+          })
+        );
+        showNotification('Usuario registrado correctamente');
+      "><i class="fas fa-user-plus"></i> Registrarse</button>
+    </div>
+
+    <div class="form">
+      <h2><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h2>
+      <div class="mb-10">
+        <label for="loginUser">Usuario</label>
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="loginUser" placeholder="Su nombre de usuario" />
+        </div>
+      </div>
+      
+      <div class="mb-10">
+        <label for="loginPass">Contraseña</label>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="loginPass" placeholder="Su contraseña" />
+        </div>
+      </div>
+      
+      <button class="accent-button" onclick="
+        (function(){
+          var user = document.getElementById('loginUser').value;
+          var pass = document.getElementById('loginPass').value;
+          var data = JSON.parse(localStorage.getItem(user));
+          if(data && data.pass === pass){
+            localStorage.setItem('loggedUser', user);
+            if(data.role === 'medico'){
+              location.href = 'dashboard-medico.html';
+            } else {
+              location.href = 'dashboard-usuario.html';
+            }
+          } else {
+            showNotification('Credenciales incorrectas', 'error');
+          }
+        })();
+      "><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+  </div>
+  
+  <script>
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = 'notification ' + type;
+      notification.style.display = 'block';
+      
+      setTimeout(() => {
+        notification.style.opacity = '1';
+      }, 10);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 300);
+      }, 3000);
+    }
+
+    // Agregar estilos para la notificación
+    document.head.insertAdjacentHTML('beforeend', `
+      <style>
+        .notification {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          padding: 12px 20px;
+          border-radius: 6px;
+          background: var(--success);
+          color: white;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 100;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          display: none;
+        }
+        
+        .notification.error {
+          background: #f44336;
+        }
+        
+        .input-group {
+          position: relative;
+        }
+        
+        .input-group i {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #aaa;
+        }
+        
+        .input-group input, .input-group select {
+          padding-left: 35px;
+        }
+        
+        label {
+          display: block;
+          margin-bottom: 4px;
+          font-weight: 500;
+          color: var(--text);
+          font-size: 0.9rem;
+        }
+      </style>
+    `);
+  </script>
+</body>
+</html>

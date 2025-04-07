@@ -1,0 +1,188 @@
+<!-- dashboard-usuario.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Usuario - Sistema Pediátrico</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="text-center">
+      <i class="fas fa-user fa-3x" style="color: var(--primary); margin-bottom: 10px;"></i>
+      <h1>Panel de Usuario</h1>
+      <p id="welcomeMessage" style="margin-bottom: 25px; color: var(--text-light);">Bienvenido a tu panel</p>
+    </div>
+
+    <div class="card">
+      <h2><i class="fas fa-calendar-alt"></i> Mis Citas Médicas</h2>
+      <p class="mb-10">Aquí podrás ver todas tus citas programadas</p>
+      <button onclick="
+        var user = localStorage.getItem('loggedUser');
+        var citas = JSON.parse(localStorage.getItem('citas') || '[]');
+        var mias = citas.filter(c => c.paciente === user);
+        mias.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+        
+        var html = '';
+        
+        if (mias.length === 0) {
+          html = '<p class=\'text-center\'>No tienes citas programadas.</p>';
+        } else {
+          mias.forEach(c => {
+            const fecha = new Date(c.fecha);
+            const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            const esPasada = fecha < new Date();
+            const claseAdicional = esPasada ? 'cita-pasada' : '';
+            
+            html += `
+              <div class='cita-item ${claseAdicional}'>
+                <div>
+                  <div class='flex space-between'>
+                    <strong><i class='fas fa-calendar'></i> ${fechaFormateada}</strong>
+                    ${esPasada ? '<span class=\'badge past\'>Pasada</span>' : '<span class=\'badge upcoming\'>Próxima</span>'}
+                  </div>
+                  <p><i class='fas fa-clipboard'></i> ${c.motivo || 'Consulta general'}</p>
+                </div>
+              </div>`;
+          });
+        }
+        
+        document.getElementById('misCitas').innerHTML = html;
+      "><i class="fas fa-sync-alt"></i> Actualizar Mis Citas</button>
+      <div id="misCitas" class="box"></div>
+    </div>
+
+    <div class="card">
+      <h2><i class="fas fa-baby"></i> Información de Bebés</h2>
+      <p class="mb-10">Mensajes de los médicos sobre el cuidado de bebés</p>
+      <button onclick="
+        var bebes = JSON.parse(localStorage.getItem('bebes') || '[]');
+        
+        var html = '';
+        
+        if (bebes.length === 0) {
+          html = '<p class=\'text-center\'>No hay información de bebés disponible.</p>';
+        } else {
+          bebes.forEach(b => {
+            html += `
+              <div class='mensaje-item'>
+                <div class='flex space-between items-center'>
+                  <strong><i class='fas fa-baby'></i> ${b.nombre}</strong>
+                  <span class='date-badge'>${b.fecha || 'Fecha no disponible'}</span>
+                </div>
+                <p class='mt-10'>${b.mensaje}</p>
+              </div>`;
+          });
+        }
+        
+        document.getElementById('mensajesBebes').innerHTML = html;
+      "><i class="fas fa-sync-alt"></i> Ver Información</button>
+      <div id="mensajesBebes" class="box"></div>
+    </div>
+
+    <button class="mt-20" onclick="
+      localStorage.removeItem('loggedUser');
+      location.href='index.html';
+    "><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+
+    <div id="notification" class="notification"></div>
+  </div>
+  
+  <script>
+    // Mostrar nombre de usuario al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+      const user = localStorage.getItem('loggedUser');
+      if (user) {
+        document.getElementById('welcomeMessage').textContent = `Bienvenido, ${user}`;
+        
+        // Cargar datos automáticamente al inicio
+        document.querySelector('button[onclick*="misCitas.innerHTML"]').click();
+        document.querySelector('button[onclick*="mensajesBebes.innerHTML"]').click();
+      }
+    });
+  
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = 'notification ' + type;
+      notification.style.display = 'block';
+      
+      setTimeout(() => {
+        notification.style.opacity = '1';
+      }, 10);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 300);
+      }, 3000);
+    }
+
+    // Estilos adicionales
+    document.head.insertAdjacentHTML('beforeend', `
+      <style>
+        .notification {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          padding: 12px 20px;
+          border-radius: 6px;
+          background: var(--success);
+          color: white;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 100;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          display: none;
+        }
+        
+        .notification.error {
+          background: #f44336;
+        }
+        
+        .badge {
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.7rem;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+        
+        .badge.upcoming {
+          background: #4cc9f0;
+          color: white;
+        }
+        
+        .badge.past {
+          background: #adb5bd;
+          color: white;
+        }
+        
+        .date-badge {
+          font-size: 0.8rem;
+          color: var(--text-light);
+        }
+        
+        .cita-pasada {
+          opacity: 0.7;
+        }
+        
+        .mt-10 {
+          margin-top: 10px;
+        }
+      </style>
+    `);
+  </script>
+</body>
+</html>
